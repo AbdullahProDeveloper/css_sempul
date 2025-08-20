@@ -1,0 +1,488 @@
+<!DOCTYPE html><html lang="bn">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CSS অল-ইন-ওয়ান — শিখুন, দেখুন, প্র্যাকটিস করুন</title>
+  <meta name="description" content="একটি একক ফাইলের ভিতর CSS-এর প্রায় সব গুরুত্বপূর্ণ বিষয়: সিলেক্টর, স্পেসিফিসিটি, বক্স-মডেল, টাইপোগ্রাফি, লেআউট (Flexbox, Grid), রেসপন্সিভ, অ্যানিমেশন, ফিল্টার, প্রিন্ট, অ্যাক্সেসিবিলিটি, আধুনিক ফিচার (container queries, :has, @layer) — লাইভ ডেমো সহ।" />
+  <style>
+    /* ---------- Root Theme & Resets ---------- */
+    :root {
+      --bg: #0b1020;
+      --bg-soft: #101735;
+      --surface: #121a3a;
+      --text: #e7ecff;
+      --muted: #a9b4d0;
+      --primary: #6ea8fe;
+      --primary-2: #96b9ff;
+      --accent: #7cf1d5;
+      --warn: #ffd166;
+      --danger: #ff6b6b;
+      --ok: #72e06a;
+      --code-bg: #0b132b;
+      --border: rgba(255,255,255,0.08);
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --radius: 14px;
+      --radius-sm: 10px;
+      --radius-lg: 24px;
+      --space: 14px;
+      --space-lg: 22px;
+      --maxw: 1200px;
+      --sidebar-w: 320px;
+      --font-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    @media (prefers-color-scheme: light) {
+      :root{ --bg:#f7f9ff; --bg-soft:#eef3ff; --surface:#ffffff; --text:#0c1222; --muted:#4a5673; --border:rgba(0,0,0,0.08); --code-bg:#f1f4ff; }
+    }*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0; font-family: var(--font-sans); background: radial-gradient(1200px 800px at 20% -10%, rgba(110,168,254,0.15), transparent 60%), radial-gradient(1000px 700px at 120% 10%, rgba(124,241,213,0.15), transparent 60%), var(--bg);
+  color: var(--text); line-height: 1.6; overflow-x: hidden;
+}
+
+/* ---------- Layout ---------- */
+.app {
+  display: grid; grid-template-columns: minmax(260px, var(--sidebar-w)) 1fr; gap: 0; min-height: 100vh;
+}
+aside {
+  position: sticky; top: 0; align-self: start; height: 100vh; overflow: auto; padding: 28px 18px 24px; background: linear-gradient(180deg, var(--bg-soft), var(--surface)); border-right: 1px solid var(--border);
+}
+main { max-width: none; }
+
+header.hero {
+  position: relative; padding: 48px 24px; background: linear-gradient(180deg, rgba(110,168,254,0.12), rgba(124,241,213,0.10)); border-bottom: 1px solid var(--border);
+}
+.container { width: min(100% - 32px, var(--maxw)); margin-inline: auto; }
+
+/* ---------- Sidebar ---------- */
+.brand { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.logo { width: 36px; height: 36px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), var(--accent)); box-shadow: var(--shadow);
+  position: relative; isolation: isolate; }
+.logo::after{ content:"CSS"; position:absolute; inset:0; display:grid; place-items:center; font-weight:800; color:#001024; letter-spacing:0.5px; font-size:12px; }
+.brand h1 { font-size: 18px; margin: 0; }
+
+.search { position: sticky; top: 0; background: inherit; padding-bottom: 10px; z-index: 2; }
+.search input {
+  width: 100%; padding: 11px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--text);
+  outline: none; transition: border-color .2s, box-shadow .2s;
+}
+.search input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(110,168,254,0.18); }
+
+nav ul { list-style: none; padding: 0; margin: 16px 0 0; display: grid; gap: 6px; }
+nav a { display: block; padding: 10px 12px; border-radius: 10px; color: var(--muted); text-decoration: none; border: 1px solid transparent; }
+nav a:hover { color: var(--text); background: rgba(110,168,254,0.08); border-color: var(--border); transform: translateX(2px); transition: .18s ease; }
+nav a.active { background: rgba(124,241,213,0.10); color: var(--text); border-color: var(--primary); }
+
+/* ---------- Cards & Typography ---------- */
+h2 { font-size: 28px; margin: 12px 0 6px; letter-spacing: .2px; }
+h3 { font-size: 18px; margin: 16px 0 6px; color: var(--primary-2); }
+p { margin: 8px 0 12px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); }
+.grid { display: grid; gap: 16px; }
+@media (min-width: 900px){ .grid.cols-2{ grid-template-columns: 1fr 1fr; } .grid.cols-3{ grid-template-columns: repeat(3, 1fr);} }
+
+.badge { display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; border:1px solid var(--border); background: linear-gradient(180deg, var(--bg), var(--surface)); font-size:12px; color: var(--muted); }
+.kbd { font-family: var(--font-mono); font-size: 12px; padding: 2px 6px; border-radius: 6px; background: var(--bg-soft); border:1px solid var(--border); }
+
+/* ---------- Code Blocks ---------- */
+pre { background: var(--code-bg); padding: 14px; border-radius: var(--radius-sm); overflow: auto; border:1px solid var(--border); }
+code { font-family: var(--font-mono); font-size: 12.5px; }
+details[open] { animation: drop .25s ease; }
+@keyframes drop { from { opacity:0; transform: translateY(-4px);} }
+
+/* ---------- Demo Area ---------- */
+.demo { display: grid; gap: 12px; }
+.demo .stage { background: repeating-conic-gradient(from 45deg, rgba(255,255,255,.03) 0 10deg, transparent 10deg 20deg), linear-gradient(180deg, var(--bg-soft), var(--surface)); border: 1px dashed var(--border); border-radius: var(--radius); padding: 18px; min-height: 100px; display:grid; place-items:center; }
+.demo .btn { cursor:pointer; padding:10px 14px; border-radius:12px; border:1px solid var(--border); background: linear-gradient(180deg, var(--bg), var(--surface)); color: var(--text); transition: transform .12s ease, box-shadow .2s, border-color .2s; }
+.demo .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,.25); border-color: var(--primary); }
+
+/* ---------- Utility ---------- */
+.note { font-size: 13px; color: var(--muted); }
+.pill { display:inline-block; padding:4px 8px; border-radius:999px; background: rgba(110,168,254,0.12); border:1px solid var(--border); font-size:12px; }
+.sticky-top { position: sticky; top: 10px; }
+
+/* ---------- Interactive Playground ---------- */
+.playground { display: grid; gap: 16px; grid-template-columns: 1fr; }
+@media (min-width: 980px){ .playground { grid-template-columns: 1.2fr .8fr; } }
+textarea.code { width: 100%; min-height: 220px; font-family: var(--font-mono); font-size: 13px; border-radius: var(--radius); border:1px solid var(--border); background: var(--code-bg); color: var(--text); padding: 12px; }
+.preview { border-radius: var(--radius); border:1px solid var(--border); background: var(--surface); min-height: 220px; padding: 14px; }
+.preview .box { width: 120px; height: 120px; background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 14px; display:grid; place-items:center; color:#001024; font-weight:900; }
+
+/* ---------- Key Demos Styles (scoped by IDs) ---------- */
+#flex-demo .stage { display:flex; gap:12px; }
+#flex-demo .item { flex: 1 1 120px; background: var(--bg-soft); border:1px solid var(--border); border-radius: 10px; padding: 10px; text-align:center; }
+
+#grid-demo .stage { display:grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+#grid-demo .cell { background: var(--bg-soft); border:1px solid var(--border); aspect-ratio: 1/1; border-radius: 10px; display:grid; place-items:center; }
+
+#transition-demo .stage .ball { width: 56px; height: 56px; border-radius: 999px; background: var(--accent); transition: transform .3s ease; }
+#transition-demo .stage:hover .ball { transform: translateX(120px) scale(1.2); }
+
+#anim-demo .stage .dot { width: 14px; height: 14px; border-radius: 999px; background: var(--primary); animation: bounce 1s infinite ease-in-out; }
+@keyframes bounce { 0%, 100% { transform: translateY(0);} 50% { transform: translateY(-12px);} }
+
+#filter-demo .stage img { max-width: 100%; border-radius: 10px; filter: contrast(1.05) saturate(1.1); transition: filter .3s; }
+#filter-demo .stage img:hover { filter: blur(1px) contrast(1.2) saturate(1.2); }
+
+#has-demo .stage ul { display:flex; gap:10px; padding:0; margin:0; list-style:none; }
+#has-demo .stage li { padding:8px 12px; border-radius:999px; background: var(--bg-soft); border:1px solid var(--border); }
+/* :has() demo */
+#has-demo .stage:has(li.selected) { outline: 2px dashed var(--accent); outline-offset: 6px; }
+
+/* Container Query Demo */
+.cq-card { container-type: inline-size; border:1px solid var(--border); border-radius: 14px; padding: 12px; background: var(--bg-soft); }
+@container (min-width: 420px) {
+  .cq-card { display:flex; align-items:center; gap: 12px; }
+  .cq-card img { width: 120px; }
+}
+
+/* Print styles (basic) */
+@media print {
+  body { background: #fff; color: #000; }
+  aside { display: none; }
+  .card, .preview, .stage { box-shadow: none; }
+  a { color: #000; text-decoration: underline; }
+}
+
+/* Hover flair */
+a.inline { color: var(--primary); text-decoration: none; border-bottom:1px dotted var(--primary); }
+a.inline:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <h1>CSS অল-ইন-ওয়ান</h1>
+      </div>
+      <div class="search">
+        <input id="search" type="search" placeholder="অনুচ্ছেদ/বিষয় খুঁজুন… (যেমন: grid, :has)" />
+      </div>
+      <nav id="toc">
+        <ul>
+          <li><a href="#intro" class="active">পরিচিতি</a></li>
+          <li><a href="#cascade">ক্যাসকেড ও স্পেসিফিসিটি</a></li>
+          <li><a href="#selectors">সিলেক্টর ও পসুডো</a></li>
+          <li><a href="#units-colors-typography">ইউনিট, কালার, টাইপোগ্রাফি</a></li>
+          <li><a href="#box">বক্স‑মডেল ও ভিজ্যুয়াল</a></li>
+          <li><a href="#layout">লেআউট: Flexbox + Grid</a></li>
+          <li><a href="#positioning">পজিশনিং, Z‑index, স্ট্যাকিং</a></li>
+          <li><a href="#responsive">রেসপন্সিভ ও কন্টেইনার কুয়েরি</a></li>
+          <li><a href="#effects">ট্রানজিশন, ট্রান্সফর্ম, অ্যানিমেশন</a></li>
+          <li><a href="#filters">ফিল্টার, ব্লেন্ড, মাস্ক</a></li>
+          <li><a href="#advanced">এডভান্সড: variables, functions, @rules</a></li>
+          <li><a href="#forms">ফর্ম, টেবিল, লিস্ট</a></li>
+          <li><a href="#accessibility">অ্যাক্সেসিবিলিটি ও প্রিন্ট</a></li>
+          <li><a href="#playground">লাইভ প্লেগ্রাউন্ড</a></li>
+        </ul>
+      </nav>
+    </aside><main>
+  <header class="hero">
+    <div class="container">
+      <div class="badge">প্রো-গ্রেড • রেসপন্সিভ • অফলাইন</div>
+      <h2>CSS—শুরু থেকে আধুনিক পর্যন্ত, এক পাতায়।</h2>
+      <p class="note">নোট: CSS-এর “সকল” ফিচার এক পাতায় দেওয়া বাস্তবে অসম্ভব—তবে এখানে সর্বাধিক গুরুত্বপূর্ণ/আধুনিক টপিকগুলো সম্পূর্ণ ব্যাখ্যা ও ডেমোসহ রাখা হয়েছে, আর আপনি সহজেই বাড়াতে পারবেন।</p>
+    </div>
+  </header>
+
+  <section id="intro" class="container grid cols-2" style="padding:18px 0 8px;">
+    <article class="card">
+      <h3>আপনি কী শিখবেন?</h3>
+      <ul>
+        <li>ক্যাসকেড, স্পেসিফিসিটি, ইনহেরিট্যান্স</li>
+        <li>বক্স‑মডেল, ভিজ্যুয়াল স্টাইলিং</li>
+        <li>লেআউট: Flexbox, Grid, Position</li>
+        <li>রেসপন্সিভ: মিডিয়া ও কন্টেইনার কুয়েরি</li>
+        <li>অ্যানিমেশন, ফিল্টার, শেপ, মাস্ক</li>
+        <li>ভেরিয়েবল, ফাংশন, @rules (@media, @supports, @layer, @property)</li>
+      </ul>
+    </article>
+    <article class="card">
+      <h3>ব্যবহার কিভাবে?</h3>
+      <p>বাম পাশের মেনু থেকে সেকশন বাছুন। প্রতিটি সেকশনে <span class="pill">ডেমো</span> + <span class="pill">কোড</span> আছে। সব ডিভাইসে স্মুথ—মোবাইলে সাইডবার স্ক্রল হবে, কন্টেন্ট ফুল-উইডথ।</p>
+      <p>শর্টকাট: <span class="kbd">/</span> চাপুন সার্চ খুলতে, <span class="kbd">Alt</span> + <span class="kbd">↑/↓</span> টিওসি নেভিগেট করতে।</p>
+    </article>
+  </section>
+
+  <!-- Cascade & Specificity -->
+  <section id="cascade" class="container" style="padding: 8px 0 0;">
+    <article class="card">
+      <h2>ক্যাসকেড ও স্পেসিফিসিটি</h2>
+      <p>CSS নির্ধারণ করে কোন স্টাইল জিতবে: উৎস (ব্রাউজার/ইউজার/অথর), ইম্পর্ট্যান্স (<code>!important</code>), স্পেসিফিসিটি (inline &gt; id &gt; class &gt; element), এবং সোর্স অর্ডার।</p>
+      <details><summary>উদাহরণ: স্পেসিফিসিটি</summary>
+        <pre><code>/* কম &gt; বেশি স্পেসিফিসিটি */
+
+button { color: black; } .button.primary { color: blue; } #cta.button.primary { color: red; } /* ফলাফল: লাল */ </code></pre> </details> <h3>@layer দিয়ে ক্যাসকেড কন্ট্রোল</h3> <pre><code>@layer base, components, utilities; @layer base { button { font: inherit; } } @layer components { .btn { padding: .6rem 1rem; } } @layer utilities { .text-primary { color: dodgerblue; } }</code></pre> </article> </section>
+
+<!-- Selectors -->
+  <section id="selectors" class="container" style="padding-top: 14px;">
+    <article class="card">
+      <h2>সিলেক্টর ও পসুডো</h2>
+      <div class="grid cols-2">
+        <div>
+          <h3>বেসিক</h3>
+          <ul>
+            <li>টাইপ: <code>div</code>, ক্লাস: <code>.card</code>, আইডি: <code>#box</code></li>
+            <li>অ্যাট্রিবিউট: <code>input[type="email"]</code></li>
+            <li>কম্বিনেটর: <code>A B</code>, <code>A &gt; B</code>, <code>A + B</code>, <code>A ~ B</code></li>
+          </ul>
+          <h3>পসুডো‑ক্লাস</h3>
+          <p><code>:hover</code>, <code>:focus-visible</code>, <code>:active</code>, <code>:disabled</code>, <code>:nth-child()</code>, <code>:not()</code>, <code>:is()</code>, <code>:where()</code>, <code>:has()</code></p>
+          <h3>পসুডো‑এলিমেন্ট</h3>
+          <p><code>::before</code>, <code>::after</code>, <code>::marker</code>, <code>::selection</code>, <code>::file-selector-button</code></p>
+        </div>
+        <div id="has-demo" class="demo">
+          <div class="stage">
+            <ul id="tags">
+              <li>CSS</li><li class="selected">Grid</li><li>Flex</li>
+            </ul>
+          </div>
+          <button class="btn" onclick="toggleSelected()">Toggle <code>.selected</code></button>
+          <details><summary>কোড দেখুন</summary>
+            <pre><code>/* :has() দিয়ে প্যারেন্ট স্টাইল */
+
+.list:has(li.selected) { outline: 2px dashed var(--accent); } </code></pre> </details> </div> </div> </article> </section>
+
+<!-- Units, Colors, Typography -->
+  <section id="units-colors-typography" class="container" style="padding-top: 14px;">
+    <article class="card">
+      <h2>ইউনিট, কালার, টাইপোগ্রাফি</h2>
+      <div class="grid cols-3">
+        <div>
+          <h3>ইউনিট</h3>
+          <p>অ্যাবসোলিউট: <code>px, cm, in</code> • রিলেটিভ: <code>em, rem, %</code> • ভিউপোর্ট: <code>vw, vh, svh, dvh</code> • ফ্লুইড: <code>clamp()</code></p>
+          <pre><code>h1 { font-size: clamp(1.6rem, 2.5vw, 2.4rem); }</code></pre>
+        </div>
+        <div>
+          <h3>কালার</h3>
+          <p><code>rgb()</code>, <code>hsl()</code>, আধুনিক: <code>oklch()</code>, <code>oklab()</code> (ব্রাউজার সাপোর্ট দেখুন)।</p>
+          <pre><code>button { color: oklch(55% 0.18 250); }</code></pre>
+        </div>
+        <div>
+          <h3>টাইপোগ্রাফি</h3>
+          <p>লাইন‑হাইট, লেটার‑স্পেসিং, <code>font-variation-settings</code>, <code>hyphens</code>, <code>text-wrap: balance;</code></p>
+          <pre><code>p { text-wrap: pretty; hyphens: auto; }</code></pre>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <!-- Box Model -->
+  <section id="box" class="container" style="padding-top: 14px;">
+    <article class="card">
+      <h2>বক্স‑মডেল ও ভিজ্যুয়াল</h2>
+      <p>কনটেন্ট → প্যাডিং → বর্ডার → মার্জিন। <code>box-sizing: border-box;</code> দিয়ে সাইজিং সহজ।</p>
+      <pre><code>.card { box-shadow: 0 10px 30px rgba(0,0,0,.25); border-radius: 14px; }</code></pre>
+      <p>বর্ডার/আউটলাইন/শ্যাডো, ব্যাকগ্রাউন্ড‑ইমেজ, গ্রেডিয়েন্ট, <code>background-attachment</code>, <code>clip-path</code>।</p>
+    </article>
+  </section>
+
+  <!-- Layout Flex/Grid -->
+  <section id="layout" class="container" style="padding-top: 14px;">
+    <article class="card">
+      <h2>লেআউট: Flexbox + Grid</h2>
+      <div id="flex-demo" class="demo">
+        <div class="stage">
+          <div class="item">A</div>
+          <div class="item">B</div>
+          <div class="item">C</div>
+        </div>
+        <details><summary>Flex কোড</summary>
+          <pre><code>.row{ display:flex; gap:12px; align-items:center; justify-content:space-between; }
+
+.item{ flex: 1 1 120px; }</code></pre> </details> </div>
+
+<div id="grid-demo" class="demo" style="margin-top:10px;">
+        <div class="stage">
+          <div class="cell">1</div><div class="cell">2</div><div class="cell">3</div><div class="cell">4</div>
+        </div>
+        <details><summary>Grid কোড</summary>
+          <pre><code>.grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap:12px; }</code></pre>
+        </details>
+      </div>
+    </article>
+  </section>
+
+  <!-- Positioning -->
+  <section id="positioning" class="container" style="padding-top: 14px;">
+    <article class="card">
+      <h2>পজিশনিং, Z‑index, স্ট্যাকিং কনটেক্সট</h2>
+      <p><code>position: static | relative | absolute | fixed | sticky</code>. <code>z-index</code> কেবল স্ট্যাকিং‑কনটেক্সটে কাজ করে (যেমন <code>positioned</code>, <code>transform</code>, <code>filter</code> ইত্যাদি নতুন কনটেক্সট তৈরি করে)।</p>
+      <pre><code>.sticky { position: sticky; top: 8px; }</code></pre>
+    </article>
+  </section>
+
+  <!-- Responsive & Container Queries -->
+  <section id="responsive" class="container" style="padding-top: 14px;">
+    <article class="card">
+      <h2>রেসপন্সিভ ও কন্টেইনার কুয়েরি</h2>
+      <div class="grid cols-2">
+        <div>
+          <h3>মিডিয়া কুয়েরি</h3>
+          <pre><code>@media (max-width: 700px){ .sidebar{ display:none; } }</code></pre>
+          <h3>লজিক্যাল ইউনিট</h3>
+          <p><code>svh/dvh</code>, <code>lvh</code> — মোবাইল ব্রাউজারের UI ভ্যারিয়েশন হ্যান্ডেল করে।</p>
+        </div>
+        <div>
+          <h3>কন্টেইনার কুয়েরি</h3>
+          <div class="cq-card grid">
+            <img alt="avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='90'%3E%3Crect width='100%25' height='100%25' fill='%236ea8fe'/%3E%3C/svg%3E" />
+            <div>
+              <strong>Card</strong>
+              <p class="note">কন্টেইনার প্রসারিত হলেই লেআউট বদলায়।</p>
+            </div>
+          </div>
+          <details><summary>কোড</summary>
+            <pre><code>.card { container-type: inline-size; }
+
+@container (min-width: 420px) { .card { display:flex; } }</code></pre> </details> </div> </div> </article> </section>
+
+<!-- Effects: transitions/animations -->
+  <section id="effects" class="container" style="padding-top: 14px;">
+    <article class="card">
+      <h2>ট্রানজিশন, ট্রান্সফর্ম, অ্যানিমেশন</h2>
+      <div id="transition-demo" class="demo">
+        <div class="stage"><div class="ball"></div></div>
+        <details><summary>Transition কোড</summary>
+          <pre><code>.box { transition: transform .3s ease; }
+
+.box:hover { transform: translateY(-6px) scale(1.03); }</code></pre> </details> </div> <div id="anim-demo" class="demo" style="margin-top:10px;"> <div class="stage"><div class="dot"></div></div> <details><summary>@keyframes কোড</summary> <pre><code>@keyframes spin { to { transform: rotate(1turn);} } .loader { animation: spin 1s linear infinite; }</code></pre> </details> </div> </article> </section>
+
+<!-- Filters, blend, mask -->
+  <section id="filters" class="container" style="padding-top: 14px;">
+    <article class="card">
+      <h2>ফিল্টার, ব্লেন্ড‑মোড, মাস্ক</h2>
+      <div id="filter-demo" class="demo">
+        <div class="stage">
+          <img alt="demo" src="https://picsum.photos/600/300" />
+        </div>
+        <details><summary>কোড</summary>
+          <pre><code>img { filter: contrast(1.1) saturate(1.1); }
+
+img:hover { filter: blur(1px) contrast(1.2); } /* mix-blend-mode, mask-image ও backdrop-filter ও ব্যবহার করতে পারেন */</code></pre> </details> </div> </article> </section>
+
+<!-- Advanced -->
+  <section id="advanced" class="container" style="padding-top: 14px;">
+    <article class="card">
+      <h2>এডভান্সড: ভেরিয়েবল, ফাংশন, @rules</h2>
+      <div class="grid cols-3">
+        <div>
+          <h3>Custom Properties</h3>
+          <pre><code>:root { --gap: 12px; --brand: #6ea8fe; }
+
+.box { gap: var(--gap); background: var(--brand); }</code></pre> <p><code>@property</code> দিয়ে টাইপড কাস্টম প্রপার্টি অ্যানিমেটেবল:</p> <pre><code>@property --h { syntax: '<number>'; initial-value: 0; inherits: false; } .box { background: oklch(70% .15 var(--h)); animation: hue 5s infinite linear; } @keyframes hue { to { --h: 360; } }</code></pre> </div> <div> <h3>ফাংশন</h3> <p><code>calc()</code>, <code>min()</code>, <code>max()</code>, <code>clamp()</code>, <code>sin()</code>/<span class="note">(experimental in some engines)</span>, <code>conic-gradient()</code> ইত্যাদি।</p> <pre><code>.fluid { width: clamp(280px, 60vw, 900px); }</code></pre> </div> <div> <h3>@supports, nesting</h3> <pre><code>@supports selector(:has()) { / modern enhancements / } / CSS Nesting (supported in modern browsers) */ .card { padding: 1rem; & a { color: dodgerblue; } & a:hover { color: deeppink; } }</code></pre> </div> </div> </article> </section>
+
+<!-- Forms, tables, lists -->
+  <section id="forms" class="container" style="padding-top: 14px;">
+    <article class="card">
+      <h2>ফর্ম, টেবিল, লিস্ট</h2>
+      <div class="grid cols-3">
+        <div>
+          <h3>ফর্ম</h3>
+          <pre><code>input, select, textarea {
+
+width: 100%; padding: .6rem .8rem; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-soft); color: var(--text); } input:focus-visible { outline: 3px solid rgba(110,168,254,.35); outline-offset: 1px; }</code></pre> </div> <div> <h3>টেবিল</h3> <pre><code>table { width:100%; border-collapse: collapse; } th, td { padding: .6rem .8rem; border-bottom: 1px solid var(--border); } tr:hover { background: rgba(110,168,254,.07); }</code></pre> </div> <div> <h3>লিস্ট</h3> <pre><code>ul { list-style: square inside; } ol { list-style: decimal-leading-zero; }</code></pre> </div> </div> </article> </section>
+
+<!-- Accessibility & Print -->
+  <section id="accessibility" class="container" style="padding-top: 14px;">
+    <article class="card">
+      <h2>অ্যাক্সেসিবিলিটি ও প্রিন্ট</h2>
+      <ul>
+        <li>ফোকাস স্টাইল <code>:focus-visible</code> রাখুন</li>
+        <li>রঙের কনট্রাস্ট (WCAG) বজায় রাখুন</li>
+        <li>মোশন‑রিডিউস: <code>@media (prefers-reduced-motion: reduce)</code></li>
+        <li>প্রিন্ট‑স্টাইল: <code>@media print</code></li>
+      </ul>
+      <pre><code>@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }</code></pre>
+    </article>
+  </section>
+
+  <!-- Playground -->
+  <section id="playground" class="container" style="padding: 14px 0 28px;">
+    <article class="card">
+      <h2>লাইভ প্লেগ্রাউন্ড</h2>
+      <div class="playground">
+        <div>
+
+<textarea id="css-editor" class="code">/* এখানে CSS লিখুন—ডান পাশের বক্সে লাইভ প্রিভিউ হবে */
+/* উদাহরণ: */
+.preview .box{
+  width: 160px;
+  height: 160px;
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  transition: transform .25s ease;
+}
+.preview:hover .box{ transform: rotate(6deg) scale(1.05); }
+</textarea><div class="demo" style="margin-top:10px;">
+            <button class="btn" id="run">Apply CSS</button>
+            <button class="btn" id="reset">Reset</button>
+          </div>
+        </div>
+        <div class="preview" id="preview">
+          <div class="box">CSS</div>
+          <style id="user-css"></style>
+        </div>
+      </div>
+      <p class="note">টিপ: আপনার লেখা CSS কপি করে নিজের প্রজেক্টে ব্যবহার করুন।</p>
+    </article>
+  </section>
+
+  <footer class="container" style="padding: 0 0 40px;">
+    <p class="note">© 2025 CSS অল-ইন-ওয়ান। এই ফাইল সম্পূর্ণ অফলাইন—কপি করে <span class="kbd">index.html</span> হিসেবে সেভ দিন।</p>
+  </footer>
+</main>
+
+  </div>  <script>
+    // --- TOC Active Link on scroll ---
+    const sections = Array.from(document.querySelectorAll('main section[id]'));
+    const tocLinks = Array.from(document.querySelectorAll('#toc a'));
+    const byId = id => document.querySelector(`#${id}`);
+    const activate = id => {
+      tocLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id));
+      history.replaceState(null, '', '#' + id);
+    };
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) activate(entry.target.id);
+      });
+    }, { rootMargin: '-40% 0px -50% 0px', threshold: 0.1 });
+    sections.forEach(s => io.observe(s));
+
+    // --- Search filter ---
+    const search = document.getElementById('search');
+    search.addEventListener('input', e => {
+      const q = e.target.value.toLowerCase();
+      tocLinks.forEach(a => {
+        const match = a.textContent.toLowerCase().includes(q) || a.getAttribute('href').toLowerCase().includes(q);
+        a.style.display = match ? '' : 'none';
+      });
+    });
+    window.addEventListener('keydown', e => { if (e.key === '/' && document.activeElement !== search) { e.preventDefault(); search.focus(); } });
+
+    // --- Keyboard nav ---
+    window.addEventListener('keydown', e => {
+      if (!e.altKey) return;
+      const idx = tocLinks.findIndex(a => a.classList.contains('active'));
+      if (e.key === 'ArrowDown') { e.preventDefault(); const n = tocLinks[Math.min(idx+1, tocLinks.length-1)]; n?.focus(); n?.click(); }
+      if (e.key === 'ArrowUp')   { e.preventDefault(); const p = tocLinks[Math.max(idx-1, 0)]; p?.focus(); p?.click(); }
+    });
+
+    // --- :has() demo button ---
+    function toggleSelected(){ document.querySelector('#tags li:nth-child(2)')?.classList.toggle('selected'); }
+    window.toggleSelected = toggleSelected;
+
+    // --- Playground ---
+    const editor = document.getElementById('css-editor');
+    const userStyleTag = document.getElementById('user-css');
+    const runBtn = document.getElementById('run');
+    const resetBtn = document.getElementById('reset');
+    const initialCSS = editor.value;
+    runBtn.addEventListener('click', () => { userStyleTag.textContent = editor.value; });
+    resetBtn.addEventListener('click', () => { editor.value = initialCSS; userStyleTag.textContent = initialCSS; });
+    // Apply initial
+    userStyleTag.textContent = initialCSS;
+  </script></body>
+</html>
